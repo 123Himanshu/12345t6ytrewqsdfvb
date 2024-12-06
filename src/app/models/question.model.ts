@@ -1,6 +1,6 @@
 export interface Question {
   id: number;
-  questionType: 'easy' | 'medium' | 'hard' | 'descriptive';
+  questionType: 'descriptive' | 'medium' | 'hard';
   text: string;
   options: string[];
   correctAnswer: number;
@@ -8,6 +8,5 @@ export interface Question {
   descriptiveAnswer?: string;
   isMarkedForReview: boolean;
   isVisited: boolean;
-  timer: number; // Time in seconds for this specific question
 }
 

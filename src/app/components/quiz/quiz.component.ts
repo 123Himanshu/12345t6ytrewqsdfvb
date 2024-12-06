@@ -21,75 +21,49 @@ import { Question } from '../../models/question.model';
     SubmissionModalComponent
   ],
   template: `
-    <div class="min-h-screen bg-gray-50 p-6">
-      <header class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-900">Angular Quiz Application</h1>
+    <div class="min-h-screen bg-gray-100 ">
+      <header class="bg-white shadow-sm mb-6 p-4 rounded-lg">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Angular Quiz Application</h1>
       </header>
 
-      <div class="flex gap-6">
-        <div class="flex-1">
-          <div class="bg-white rounded-xl shadow-sm p-8">
-            <div class="flex justify-between items-start mb-6">
-              <h2 class="text-xl">
-                <span class="text-gray-600">Question {{ currentQuestion + 1 }} of {{ questions.length }}:</span>
-                <span class="ml-2 font-medium">{{ currentQuestionData.text }}</span>
-              </h2>
-              <button 
-                (click)="toggleReview()"
-                class="px-6 py-2 rounded-full text-white text-sm"
-                [class.bg-purple-400]="!currentQuestionData.isMarkedForReview"
-                [class.bg-purple-500]="currentQuestionData.isMarkedForReview">
-                Mark for Review
-              </button>
-            </div>
+      <div class="flex flex-col sm:flex-row gap-6">
+        <div class="flex-1 order-2 sm:order-1">
+          <app-question-display
+            [question]="currentQuestionData"
+            [questionNumber]="currentQuestion + 1"
+            [totalQuestions]="questions.length"
+            (answerSelect)="selectAnswer($event)"
+            (descriptiveAnswerChange)="setDescriptiveAnswer($event)"
+            (reviewToggle)="toggleReview()"
+          ></app-question-display>
 
-            <div class="space-y-4 mb-8">
-              @for (option of currentQuestionData.options; track option; let i = $index) {
-                <div 
-                  (click)="selectAnswer(i)"
-                  class="flex items-center p-4 bg-white rounded-lg border cursor-pointer hover:border-blue-500 transition-colors"
-                  [class.border-blue-500]="currentQuestionData.selectedAnswer === i">
-                  <input 
-                    type="radio" 
-                    [id]="'option' + i" 
-                    [name]="'question' + currentQuestionData.id" 
-                    [value]="i" 
-                    [checked]="currentQuestionData.selectedAnswer === i"
-                    class="h-4 w-4 text-blue-600 focus:ring-blue-500">
-                  <label [for]="'option' + i" class="ml-3 cursor-pointer">{{ option }}</label>
-                </div>
-              }
-            </div>
-
-            <div class="flex justify-between items-center">
-              <button 
-                (click)="previousQuestion()" 
-                [disabled]="currentQuestion === 0"
-                class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                Previous
-              </button>
-              <button 
-                (click)="submitQuiz()"
-                class="px-8 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600">
-                Submit Quiz
-              </button>
-              <button 
-                (click)="nextQuestion()" 
-                [disabled]="!isCurrentQuestionAttempted() || currentQuestion === questions.length - 1"
-                class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                Next
-              </button>
-            </div>
+          <div class="flex justify-between items-center mt-6 space-x-4">
+            <button 
+              (click)="previousQuestion()" 
+              [disabled]="currentQuestion === 0"
+              class="btn btn-secondary">
+              Previous
+            </button>
+            <button 
+              (click)="submitQuiz()"
+              class="btn btn-success">
+              Submit Quiz
+            </button>
+            <button 
+              (click)="nextQuestion()" 
+              [disabled]="!isCurrentQuestionAttempted() || currentQuestion === questions.length - 1"
+              class="btn btn-primary">
+              Next
+            </button>
           </div>
         </div>
 
-        <div class="w-72 space-y-6">
+        <div class="w-full sm:w-64 space-y-4 order-1 sm:order-2">
           <app-quiz-timer
+            [totalSeconds]="totalSeconds"
             [questionType]="currentQuestionData.questionType"
-            [timeInSeconds]="currentQuestionData.timer"
             (timeUp)="handleTimeUp()"
           ></app-quiz-timer>
-
           <app-question-navigator
             [questions]="questions"
             [currentQuestionIndex]="currentQuestion"
@@ -105,11 +79,27 @@ import { Question } from '../../models/question.model';
       (onConfirm)="confirmSubmit()"
       (onCancel)="closeSubmissionModal()"
     ></app-submission-modal>
-  `
+  `,
+  styles: [`
+    .btn {
+      @apply px-4 py-2 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    }
+    .btn-secondary {
+      @apply bg-gray-500 text-white hover:bg-gray-600 focus:ring-gray-500;
+    }
+    .btn-success {
+      @apply bg-green-500 text-white hover:bg-green-600 focus:ring-green-500;
+    }
+    .btn-primary {
+      @apply bg-blue-500 text-white hover:bg-blue-600 focus:ring-blue-500;
+    }
+  `]
 })
 export class QuizComponent implements OnInit, OnDestroy {
   questions: Question[] = [];
   currentQuestion = 0;
+  totalSeconds = 0;
+  private timerInterval: any;
   showSubmissionModal = false;
 
   constructor(
@@ -123,15 +113,42 @@ export class QuizComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.questions = this.quizService.generateQuestions();
+    this.calculateTotalTime();
+    this.startTimer();
   }
 
   ngOnDestroy() {
-    // Clean up if needed
+    this.clearTimer();
+  }
+
+  private calculateTotalTime() {
+    this.totalSeconds = this.questions.reduce((total, q) => 
+      total + this.quizService.calculateQuestionTime(q.questionType), 0);
+  }
+
+  private startTimer() {
+    this.timerInterval = setInterval(() => {
+      if (this.totalSeconds > 0) {
+        this.totalSeconds--;
+        if (this.totalSeconds === 120) {
+          this.toastService.showWarning('⚠️ Only 2 minutes remaining!');
+        }
+      } else {
+        this.handleTimeUp();
+      }
+    }, 1000);
+  }
+
+  private clearTimer() {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+    }
   }
 
   handleTimeUp() {
-    this.toastService.showInfo("Time's up for this question! Moving to the next one.");
-    this.nextQuestion();
+    this.clearTimer();
+    this.toastService.showInfo("Time's up! We'll submit your quiz now.");
+    this.confirmSubmit();
   }
 
   submitQuiz() {
@@ -140,6 +157,7 @@ export class QuizComponent implements OnInit, OnDestroy {
 
   confirmSubmit() {
     this.closeSubmissionModal();
+    this.clearTimer();
     this.toastService.showSuccess('Quiz submitted successfully! Thank you for your participation.');
     // Here you would typically send the results to a server
   }
@@ -150,6 +168,10 @@ export class QuizComponent implements OnInit, OnDestroy {
 
   selectAnswer(answer: number) {
     this.questions[this.currentQuestion].selectedAnswer = answer;
+  }
+
+  setDescriptiveAnswer(answer: string) {
+    this.questions[this.currentQuestion].descriptiveAnswer = answer;
   }
 
   toggleReview() {
@@ -166,8 +188,6 @@ export class QuizComponent implements OnInit, OnDestroy {
   nextQuestion() {
     if (this.currentQuestion < this.questions.length - 1) {
       this.goToQuestion(this.currentQuestion + 1);
-    } else {
-      this.submitQuiz();
     }
   }
 
