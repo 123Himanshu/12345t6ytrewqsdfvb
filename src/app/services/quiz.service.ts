@@ -8,12 +8,13 @@ export class QuizService {
   private baseQuestions: Question[] = [
     {
       id: 1,
-      questionType: "medium",
+      questionType: "easy",
       text: 'What is the main building block of Angular applications?',
       options: ['Components', 'Modules', 'Services', 'Templates'],
       correctAnswer: 0,
       isMarkedForReview: false,
-      isVisited: false
+      isVisited: false,
+      timer: 60 // 1 minute for easy question
     },
     {
       id: 2,
@@ -22,7 +23,8 @@ export class QuizService {
       options: [],
       correctAnswer: -1,
       isMarkedForReview: false,
-      isVisited: false
+      isVisited: false,
+      timer: 180 // 3 minutes for descriptive question
     },
     {
       id: 3,
@@ -31,7 +33,8 @@ export class QuizService {
       options: ['Manual checking of values', 'Zone.js tracking changes', 'Regular DOM updates', 'Continuous polling'],
       correctAnswer: 1,
       isMarkedForReview: false,
-      isVisited: false
+      isVisited: false,
+      timer: 120 // 2 minutes for hard question
     }
   ];
 
@@ -43,19 +46,38 @@ export class QuizService {
     // Add more descriptive questions
     questions.push({
       id: 4,
-      questionType: "descriptive",
+      questionType: "medium",
       text: 'Compare and contrast Angular Services and Components. When would you use each?',
       options: [],
       correctAnswer: -1,
       isMarkedForReview: false,
-      isVisited: false
+      isVisited: false,
+      timer: 90 // 1.5 minutes for medium question
     });
 
     // Generate remaining questions
     for (let i = questions.length; i < 20; i++) {
       const topic = topics[Math.floor(Math.random() * topics.length)];
       const action = actions[Math.floor(Math.random() * actions.length)];
-      const type = Math.random() > 0.8 ? 'descriptive' : (Math.random() > 0.5 ? 'medium' : 'hard');
+      const type = Math.random() > 0.8 ? 'descriptive' : (Math.random() > 0.5 ? 'medium' : (Math.random() > 0.25 ? 'easy' : 'hard'));
+
+      let timer: number;
+      switch (type) {
+        case 'easy':
+          timer = 60;
+          break;
+        case 'medium':
+          timer = 90;
+          break;
+        case 'hard':
+          timer = 120;
+          break;
+        case 'descriptive':
+          timer = 180;
+          break;
+        default:
+          timer = 60;
+      }
 
       if (type === 'descriptive') {
         questions.push({
@@ -65,7 +87,8 @@ export class QuizService {
           options: [],
           correctAnswer: -1,
           isMarkedForReview: false,
-          isVisited: false
+          isVisited: false,
+          timer: timer
         });
       } else {
         questions.push({
@@ -80,20 +103,13 @@ export class QuizService {
           ],
           correctAnswer: Math.floor(Math.random() * 4),
           isMarkedForReview: false,
-          isVisited: false
+          isVisited: false,
+          timer: timer
         });
       }
     }
 
     return questions;
   }
-
-  calculateQuestionTime(questionType?: string): number {
-    switch (questionType?.toLowerCase()) {
-      case 'medium': return 8;
-      case 'hard': return 12;
-      case 'descriptive': return 60;
-      default: return 8;
-    }
-  }
 }
+

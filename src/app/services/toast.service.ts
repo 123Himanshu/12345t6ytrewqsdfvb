@@ -8,10 +8,9 @@ export class ToastService {
   private showToast(message: string, background: string) {
     Toastify({
       text: message,
-      duration: 5000,
+      duration: 3000,
       gravity: "bottom",
       position: "right",
-      className: "custom-toast",
       style: {
         background
       }
@@ -19,18 +18,19 @@ export class ToastService {
   }
 
   showSuccess(message: string) {
-    this.showToast(message, "linear-gradient(to right, #22c55e, #16a34a)");
+    this.showToast(message, "linear-gradient(to right, #00b09b, #96c93d)");
   }
 
   showWarning(message: string) {
-    this.showToast(message, "linear-gradient(to right, #eab308, #f59e0b)");
+    this.showToast(message, "linear-gradient(to right, #ffa35f, #ff7b00)");
   }
 
   showError(message: string) {
-    this.showToast(message, "linear-gradient(to right, #ef4444, #dc2626)");
+    this.showToast(message, "linear-gradient(to right, #ff5f6d, #ffc371)");
   }
 
   showInfo(message: string) {
-    this.showToast(message, "linear-gradient(to right, #3b82f6, #2563eb)");
+    this.showToast(message, "linear-gradient(to right, #2193b0, #6dd5ed)");
   }
 }
+

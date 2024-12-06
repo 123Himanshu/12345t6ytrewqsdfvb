@@ -10,7 +10,7 @@ import { Question } from '../../models/question.model';
     <div class="bg-white rounded-xl shadow-lg p-4">
       <h2 class="text-lg font-semibold mb-4">Question Navigator</h2>
       <div class="grid grid-cols-4 gap-2">
-        @for (question of questions; track question.id; let i = $index) {
+        @for (question of questions; track question; let i = $index) {
           <button 
             (click)="onQuestionSelect(i)"
             class="w-10 h-10 rounded-lg text-sm font-medium transition-colors flex items-center justify-center"
@@ -21,26 +21,26 @@ import { Question } from '../../models/question.model';
         }
       </div>
 
-      <div class="mt-6 space-y-2">
-        <div class="flex items-center gap-2">
-          <div class="w-4 h-4 bg-emerald-500 rounded"></div>
-          <span class="text-sm">Not Visited</span>
+      <div class="mt-4 grid grid-cols-2 gap-2 text-xs">
+        <div class="flex items-center gap-1">
+          <div class="w-3 h-3 bg-emerald-500 rounded"></div>
+          <span>Not Visited</span>
         </div>
-        <div class="flex items-center gap-2">
-          <div class="w-4 h-4 bg-blue-500 rounded"></div>
-          <span class="text-sm">Current Question</span>
+        <div class="flex items-center gap-1">
+          <div class="w-3 h-3 bg-blue-500 rounded"></div>
+          <span>Current</span>
         </div>
-        <div class="flex items-center gap-2">
-          <div class="w-4 h-4 bg-yellow-400 rounded"></div>
-          <span class="text-sm">Marked for Review</span>
+        <div class="flex items-center gap-1">
+          <div class="w-3 h-3 bg-yellow-400 rounded"></div>
+          <span>For Review</span>
         </div>
-        <div class="flex items-center gap-2">
-          <div class="w-4 h-4 bg-green-100 rounded"></div>
-          <span class="text-sm">Answered</span>
+        <div class="flex items-center gap-1">
+          <div class="w-3 h-3 bg-green-100 rounded"></div>
+          <span>Answered</span>
         </div>
-        <div class="flex items-center gap-2">
-          <div class="w-4 h-4 bg-gray-200 rounded"></div>
-          <span class="text-sm">Visited</span>
+        <div class="flex items-center gap-1">
+          <div class="w-3 h-3 bg-gray-200 rounded"></div>
+          <span>Visited</span>
         </div>
       </div>
     </div>
@@ -81,3 +81,4 @@ export class QuestionNavigatorComponent {
     return `${baseClass} bg-emerald-500 text-white`;
   }
 }
+

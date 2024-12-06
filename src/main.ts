@@ -1,17 +1,13 @@
-import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { QuizPage } from './app/pages/quiz.page';
-import { NotificationComponent } from './app/components/notification/notification.component';
+import { AppComponent } from './app/app.component';
+import { importProvidersFrom } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { routes } from './app/app.routes';
 
-@Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [QuizPage, NotificationComponent],
-  template: `
-    <app-notification />
-    <app-quiz />
-  `
-})
-export class App {}
+bootstrapApplication(AppComponent, {
+  providers: [
+    importProvidersFrom(),
+    provideRouter(routes)
+  ]
+}).catch(err => console.error(err));
 
-bootstrapApplication(App);
